@@ -1,0 +1,137 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+
+public class InventoryManagementSystem extends JFrame {
+    private JTextField productField;
+    private JTextField quantityField;
+    private JTextField barcodeField;
+    private JTextField salesBarcodeField;
+    private JTextField salesQuantityField;
+    private JTextArea displayArea;
+    private JTextArea salesArea;
+
+    private HashMap<String, Integer> inventory;
+
+    public InventoryManagementSystem() {
+        inventory = new HashMap<>();
+
+        setTitle("Inventory Management System");
+        setSize(500, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new FlowLayout());
+
+        // Product Management Section
+        JLabel productLabel = new JLabel("Product Name:");
+        productField = new JTextField(15);
+        
+        JLabel quantityLabel = new JLabel("Quantity:");
+        quantityField = new JTextField(5);
+        
+        JLabel barcodeLabel = new JLabel("Barcode:");
+        barcodeField = new JTextField(15);
+        
+        JButton addButton = new JButton("Add Product");
+        JButton viewButton = new JButton("View Inventory");
+        
+        displayArea = new JTextArea(10, 30);
+        displayArea.setEditable(false);
+        
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String productName = productField.getText();
+                String quantityStr = quantityField.getText();
+                String barcode = barcodeField.getText();
+                
+                if (!productName.isEmpty() && !quantityStr.isEmpty() && !barcode.isEmpty()) {
+                    int quantity = Integer.parseInt(quantityStr);
+                    inventory.put(barcode, quantity);
+                    productField.setText("");
+                    quantityField.setText("");
+                    barcodeField.setText("");
+                    JOptionPane.showMessageDialog(null, "Product added successfully!");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please fill all fields.");
+                }
+            }
+        });
+
+        viewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayArea.setText("");
+                for (String barcode : inventory.keySet()) {
+                    displayArea.append("Barcode: " + barcode + ", Quantity: " + inventory.get(barcode) + "\n");
+                }
+            }
+        });
+
+        // Sales Management Section
+        JLabel salesBarcodeLabel = new JLabel("Sales Barcode:");
+        salesBarcodeField = new JTextField(15);
+        
+        JLabel salesQuantityLabel = new JLabel("Sales Quantity:");
+        salesQuantityField = new JTextField(5);
+        
+        JButton sellButton = new JButton("Sell Product");
+        salesArea = new JTextArea(10, 30);
+        salesArea.setEditable(false);
+        
+        sellButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String salesBarcode = salesBarcodeField.getText();
+                String salesQuantityStr = salesQuantityField.getText();
+                
+                if (!salesBarcode.isEmpty() && !salesQuantityStr.isEmpty()) {
+                    int salesQuantity = Integer.parseInt(salesQuantityStr);
+                    if (inventory.containsKey(salesBarcode)) {
+                        int currentQuantity = inventory.get(salesBarcode);
+                        if (currentQuantity >= salesQuantity) {
+                            // Update stock after sale
+                            inventory.put(salesBarcode, currentQuantity - salesQuantity);
+                            salesArea.append("Sold " + salesQuantity + " of Barcode: " + salesBarcode + "\n");
+                            salesArea.append("Remaining stock: " + (currentQuantity - salesQuantity) + "\n");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Not enough stock to sell.");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Product not found.");
+                    }
+                    salesBarcodeField.setText("");
+                    salesQuantityField.setText("");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please fill all fields.");
+                }
+            }
+        });
+
+        // Adding components to the frame
+        add(productLabel);
+        add(productField);
+        add(quantityLabel);
+        add(quantityField);
+        add(barcodeLabel);
+        add(barcodeField);
+        add(addButton);
+        add(viewButton);
+        add(new JScrollPane(displayArea));
+
+        // Adding sales management components
+        add(salesBarcodeLabel);
+        add(salesBarcodeField);
+        add(salesQuantityLabel);
+        add(salesQuantityField);
+        add(sellButton);
+        add(new JScrollPane(salesArea));
+
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new InventoryManagementSystem();
+    }
+}
