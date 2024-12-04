@@ -13,39 +13,40 @@ public class InventoryManagementSystem extends JFrame {
     private JTextArea displayArea;
     private JTextArea salesArea;
 
+    private JTextField searchField; // New field for search/filter
     private HashMap<String, Integer> inventory;
 
     public InventoryManagementSystem() {
         inventory = new HashMap<>();
 
         setTitle("Inventory Management System");
-        setSize(500, 600);
+        setSize(500, 700); // Increased the window size to accommodate new components
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
         // Product Management Section
         JLabel productLabel = new JLabel("Product Name:");
         productField = new JTextField(15);
-        
+
         JLabel quantityLabel = new JLabel("Quantity:");
         quantityField = new JTextField(5);
-        
+
         JLabel barcodeLabel = new JLabel("Barcode:");
         barcodeField = new JTextField(15);
-        
+
         JButton addButton = new JButton("Add Product");
         JButton viewButton = new JButton("View Inventory");
-        
+
         displayArea = new JTextArea(10, 30);
         displayArea.setEditable(false);
-        
+
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String productName = productField.getText();
                 String quantityStr = quantityField.getText();
                 String barcode = barcodeField.getText();
-                
+
                 if (!productName.isEmpty() && !quantityStr.isEmpty() && !barcode.isEmpty()) {
                     int quantity = Integer.parseInt(quantityStr);
                     inventory.put(barcode, quantity);
@@ -62,30 +63,27 @@ public class InventoryManagementSystem extends JFrame {
         viewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                displayArea.setText("");
-                for (String barcode : inventory.keySet()) {
-                    displayArea.append("Barcode: " + barcode + ", Quantity: " + inventory.get(barcode) + "\n");
-                }
+                displayInventory(inventory); // Display the whole inventory
             }
         });
 
         // Sales Management Section
         JLabel salesBarcodeLabel = new JLabel("Sales Barcode:");
         salesBarcodeField = new JTextField(15);
-        
+
         JLabel salesQuantityLabel = new JLabel("Sales Quantity:");
         salesQuantityField = new JTextField(5);
-        
+
         JButton sellButton = new JButton("Sell Product");
         salesArea = new JTextArea(10, 30);
         salesArea.setEditable(false);
-        
+
         sellButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String salesBarcode = salesBarcodeField.getText();
                 String salesQuantityStr = salesQuantityField.getText();
-                
+
                 if (!salesBarcode.isEmpty() && !salesQuantityStr.isEmpty()) {
                     int salesQuantity = Integer.parseInt(salesQuantityStr);
                     if (inventory.containsKey(salesBarcode)) {
@@ -128,7 +126,54 @@ public class InventoryManagementSystem extends JFrame {
         add(sellButton);
         add(new JScrollPane(salesArea));
 
+        // Adding search/filter section
+        JLabel searchLabel = new JLabel("Search by Barcode:");
+        searchField = new JTextField(15);
+        JButton searchButton = new JButton("Search Product");
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String searchQuery = searchField.getText();
+                if (!searchQuery.isEmpty()) {
+                    // Filter the inventory by barcode or product name
+                    filterInventory(searchQuery);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please enter a barcode or product name to search.");
+                }
+            }
+        });
+
+        add(searchLabel);
+        add(searchField);
+        add(searchButton);
+
         setVisible(true);
+    }
+
+    // Method to display the full inventory
+    private void displayInventory(HashMap<String, Integer> inventory) {
+        displayArea.setText("");
+        for (String barcode : inventory.keySet()) {
+            displayArea.append("Barcode: " + barcode + ", Quantity: " + inventory.get(barcode) + "\n");
+        }
+    }
+
+    // Method to filter and display inventory based on the search query
+    private void filterInventory(String query) {
+        displayArea.setText(""); // Clear current display
+        boolean found = false;
+
+        for (String barcode : inventory.keySet()) {
+            if (barcode.contains(query)) { // Check if barcode contains the search term
+                displayArea.append("Barcode: " + barcode + ", Quantity: " + inventory.get(barcode) + "\n");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            displayArea.append("No products found matching the search criteria.");
+        }
     }
 
     public static void main(String[] args) {
